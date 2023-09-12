@@ -15,8 +15,8 @@ export const options: NextAuthOptions = {
       clientSecret: process.env.GITHUB_SECRET as string,
     }),
     GoogleProvider({
-      clientId: 'sdsd',
-      clientSecret: 'ssssssss',
+      clientId: '',
+      clientSecret: '',
     }),
     CredentialsProvider({
       name: 'Flexibble',
