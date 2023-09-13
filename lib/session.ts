@@ -1,22 +1,23 @@
-import type { NextAuthOptions, User } from 'next-auth'
+import { getServerSession, type NextAuthOptions, type User } from 'next-auth'
 import { AdapterUser } from 'next-auth/adapters'
 
 import GoogleProvider from 'next-auth/providers/google'
 import GitHubProvider from 'next-auth/providers/github'
 import CredentialsProvider from 'next-auth/providers/credentials'
-
 import jsonwebtoken from 'jsonwebtoken'
 import { JWT } from 'next-auth/jwt'
+import { SessionInterface, UserProfile } from '@/common.types'
+import { createUser, getUser } from './action'
 
 export const options: NextAuthOptions = {
   providers: [
     GitHubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
     }),
     GoogleProvider({
-      clientId: '',
-      clientSecret: '',
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     CredentialsProvider({
       name: 'Flexibble',
@@ -51,6 +52,61 @@ export const options: NextAuthOptions = {
       },
     }),
   ],
+  jwt: {
+    encode: ({ secret, token }) => {
+      const encodedToken = jsonwebtoken.sign(
+        {
+          ...token,
+          iss: 'grafbase',
+          exp: Math.floor(Date.now() / 1000) + 60 * 60,
+        },
+        secret
+      )
+
+      return encodedToken
+    },
+    decode: async ({ secret, token }) => {
+      const decodedToken = jsonwebtoken.verify(token!, secret)
+      return decodedToken as JWT
+    },
+  },
+  theme: {
+    colorScheme: 'light',
+    logo: '/logo.png',
+  },
+  callbacks: {
+    async session({ session }) {
+      const email = session?.user?.email as string
+      try {
+        const data = (await getUser(session?.user?.email as string)) as { user?: UserProfile }
+        const newSession = {
+          ...session,
+          user: {
+            ...session.user,
+            ...data?.user,
+          },
+        }
+        return newSession
+      } catch (error) {
+        console.log(error)
+        return session
+      }
+    },
+    async signIn({ user }: { user: AdapterUser | User }) {
+      try {
+        // get the user from database if they exists
+        const userExists = (await getUser(user?.email as string)) as { user?: UserProfile }
+        // if they don't, create them
+        if (!userExists) {
+          await createUser(user.name as string, user.email as string, user.image as string)
+        }
+        return true
+      } catch (error) {
+        console.log(`Sign in Error: ${error}`)
+        return false
+      }
+    },
+  },
   //   callbacks: {
   //     async session({ session }) {
   //       // store the user id from MongoDB to session
@@ -83,4 +139,9 @@ export const options: NextAuthOptions = {
   //       }
   //     },
   //   },
+}
+
+export async function getCurrentUser() {
+  const session = (await getServerSession(options)) as SessionInterface
+  return session
 }
