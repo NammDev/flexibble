@@ -4,6 +4,8 @@ import { FormState, ProjectInterface, SessionInterface } from '@/common.types'
 import Image from 'next/image'
 import React, { ChangeEvent, useState } from 'react'
 import FormField from './FormField'
+import CustomMenu from './CustomMenu'
+import { categoryFilters } from '@/constants'
 
 type Props = {
   type: string
@@ -82,6 +84,13 @@ const ProjectForm = ({ type, session, project }: Props) => {
         state={form.githubUrl}
         placeholder='https://github.com/adrianhajdin'
         setState={(value) => handleStateChange('githubUrl', value)}
+      />
+
+      <CustomMenu
+        title='Category'
+        state={form.category}
+        filters={categoryFilters}
+        setState={(value) => handleStateChange('category', value)}
       />
     </form>
   )
