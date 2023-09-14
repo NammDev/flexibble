@@ -72,13 +72,15 @@ export const options: NextAuthOptions = {
   },
   theme: {
     colorScheme: 'light',
-    logo: '/logo.png',
+    logo: '/logo.svg',
   },
   callbacks: {
     async session({ session }) {
       const email = session?.user?.email as string
+
       try {
-        const data = (await getUser(session?.user?.email as string)) as { user?: UserProfile }
+        const data = (await getUser(email)) as { user?: UserProfile }
+
         const newSession = {
           ...session,
           user: {
@@ -86,59 +88,28 @@ export const options: NextAuthOptions = {
             ...data?.user,
           },
         }
+
         return newSession
-      } catch (error) {
-        console.log(error)
+      } catch (error: any) {
+        console.error('Error retrieving user data: ', error.message)
         return session
       }
     },
     async signIn({ user }: { user: AdapterUser | User }) {
       try {
-        // get the user from database if they exists
         const userExists = (await getUser(user?.email as string)) as { user?: UserProfile }
-        // if they don't, create them
-        if (!userExists) {
+
+        if (!userExists.user) {
           await createUser(user.name as string, user.email as string, user.image as string)
         }
+
         return true
-      } catch (error) {
-        console.log(`Sign in Error: ${error}`)
+      } catch (error: any) {
+        console.log('Error checking if user exists: ', error.message)
         return false
       }
     },
   },
-  //   callbacks: {
-  //     async session({ session }) {
-  //       // store the user id from MongoDB to session
-  //       const sessionUser = await User.findOne({ email: session.user?.email })
-
-  //       session.user.id = sessionUser._id.toString()
-
-  //       return session
-  //     },
-  //     async signIn({ user }) {
-  //       try {
-  //         await connectToDB()
-
-  //         // check if user already exsist
-  //         const userExists = await User.findOne({ email: user?.email })
-
-  //         // if not, create a new user
-  //         if (!userExists) {
-  //           await User.create({
-  //             email: user?.email,
-  //             username: user.name?.replace(' ', '').toLowerCase(),
-  //             image: user?.image,
-  //           })
-  //         }
-
-  //         return true
-  //       } catch (error) {
-  //         console.log(error)
-  //         return false
-  //       }
-  //     },
-  //   },
 }
 
 export async function getCurrentUser() {
