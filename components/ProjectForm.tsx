@@ -50,7 +50,9 @@ const ProjectForm = ({ type, session, project }: Props) => {
     e.preventDefault()
     setSubmitting(true)
     try {
-      console.log(form)
+      if (type === 'create') {
+        // create project
+      }
     } catch (error) {
       alert(`Failed to ${type === 'create' ? 'create' : 'edit'} a project. Try again!`)
     } finally {
