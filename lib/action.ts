@@ -7,6 +7,7 @@ import {
   getProjectsOfUserQuery,
   getUserQuery,
   projectsQuery,
+  projectsQueryWithoutCateg,
   updateProjectMutation,
 } from '@/graphql'
 import { GraphQLClient } from 'graphql-request'
@@ -86,7 +87,12 @@ export const createNewProject = async (form: ProjectForm, creatorId: string, tok
 
 export const fetchAllProjects = (category?: string | null, endcursor?: string | null) => {
   client.setHeader('x-api-key', apiKey)
-  return makeGraphQLRequest(projectsQuery, { category, endcursor })
+  // category = ''
+  if (category) {
+    return makeGraphQLRequest(projectsQuery, { category, endcursor })
+  } else {
+    return makeGraphQLRequest(projectsQueryWithoutCateg, { endcursor })
+  }
 }
 
 export const getProjectDetails = (id: string) => {
