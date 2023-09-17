@@ -7,7 +7,7 @@ import FormField from './FormField'
 import CustomMenu from './CustomMenu'
 import { categoryFilters } from '@/constants'
 import Button from './Button'
-import { createNewProject, fetchToken } from '@/lib/action'
+import { createNewProject, fetchToken, updateProject } from '@/lib/action'
 import { useRouter } from 'next/navigation'
 
 type Props = {
@@ -58,6 +58,11 @@ const ProjectForm = ({ type, session, project }: Props) => {
       if (type === 'create') {
         // create project
         await createNewProject(form, session?.user?.id, token)
+        router.push('/')
+      }
+      if (type === 'edit') {
+        await updateProject(form, project?.id as string, token)
+
         router.push('/')
       }
     } catch (error) {

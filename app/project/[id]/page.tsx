@@ -1,5 +1,6 @@
 import { ProjectInterface } from '@/common.types'
 import Modal from '@/components/Modal'
+import ProjectActions from '@/components/ProjectActions'
 import RelatedProjects from '@/components/RelatedProjects'
 import { getProjectDetails } from '@/lib/action'
 import { getCurrentUser } from '@/lib/session'
@@ -49,8 +50,7 @@ const Project = async ({ params: { id } }: ProjectProp) => {
 
           {session?.user?.email === projectDetails?.createdBy?.email && (
             <div className='flex justify-end items-center gap-2'>
-              <p>Hello</p>
-              {/* <ProjectActions projectId={projectDetails?.id} /> */}
+              <ProjectActions projectId={projectDetails?.id} />
             </div>
           )}
         </section>
