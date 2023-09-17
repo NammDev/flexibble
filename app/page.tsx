@@ -1,4 +1,5 @@
 import { ProjectInterface } from '@/common.types'
+import LoadMore from '@/components/LoadMore'
 import ProjectCard from '@/components/ProjectCard'
 import { fetchAllProjects } from '@/lib/action'
 
@@ -17,6 +18,7 @@ type ProjectSearch = {
 const Home = async () => {
   const data = (await fetchAllProjects('Frontend')) as ProjectSearch
   const projectsToDisplay = data?.projectSearch?.edges || []
+
   if (projectsToDisplay.length === 0) {
     return (
       <section className='flexStart flex-col paddings'>
@@ -25,23 +27,30 @@ const Home = async () => {
       </section>
     )
   }
+
   return (
     <section className='flex-start flex-col paddings mb-16'>
       <h1>Categories</h1>
       <section className='projects-grid'>
         {projectsToDisplay.map(({ node }: { node: ProjectInterface }) => (
           <ProjectCard
-            key={node?.id}
+            key={`${node?.id}`}
             id={node?.id}
             image={node?.image}
             title={node?.title}
-            name={node?.createdBy?.name}
-            avatarUrl={node?.createdBy?.avatarUrl}
-            userId={node?.createdBy?.id}
+            name={node?.createdBy.name}
+            avatarUrl={node?.createdBy.avatarUrl}
+            userId={node?.createdBy.id}
           />
         ))}
       </section>
-      <h1>Loadmore</h1>
+
+      <LoadMore
+        startCursor={data?.projectSearch?.pageInfo?.startCursor}
+        endCursor={data?.projectSearch?.pageInfo?.endCursor}
+        hasPreviousPage={data?.projectSearch?.pageInfo?.hasPreviousPage}
+        hasNextPage={data?.projectSearch?.pageInfo.hasNextPage}
+      />
     </section>
   )
 }
