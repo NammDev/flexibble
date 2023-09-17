@@ -7,6 +7,8 @@ import FormField from './FormField'
 import CustomMenu from './CustomMenu'
 import { categoryFilters } from '@/constants'
 import Button from './Button'
+import { createNewProject, fetchToken } from '@/lib/action'
+import { useRouter } from 'next/navigation'
 
 type Props = {
   type: string
@@ -15,6 +17,7 @@ type Props = {
 }
 
 const ProjectForm = ({ type, session, project }: Props) => {
+  const router = useRouter()
   const [submitting, setSubmitting] = useState<boolean>(false)
 
   const [form, setForm] = useState<FormState>({
@@ -49,9 +52,13 @@ const ProjectForm = ({ type, session, project }: Props) => {
   const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+    console.log('Before fetch TOken')
+    const { token } = await fetchToken()
     try {
       if (type === 'create') {
         // create project
+        await createNewProject(form, session?.user?.id, token)
+        router.push('/')
       }
     } catch (error) {
       alert(`Failed to ${type === 'create' ? 'create' : 'edit'} a project. Try again!`)
