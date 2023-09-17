@@ -3,6 +3,15 @@ import LoadMore from '@/components/LoadMore'
 import ProjectCard from '@/components/ProjectCard'
 import { fetchAllProjects } from '@/lib/action'
 
+type SearchParams = {
+  category?: string | null
+  endcursor?: string | null
+}
+
+type Props = {
+  searchParams: SearchParams
+}
+
 type ProjectSearch = {
   projectSearch: {
     edges: { node: ProjectInterface }[]
@@ -15,8 +24,8 @@ type ProjectSearch = {
   }
 }
 
-const Home = async () => {
-  const data = (await fetchAllProjects('Frontend')) as ProjectSearch
+const Home = async ({ searchParams: { category, endcursor } }: Props) => {
+  const data = (await fetchAllProjects(category, endcursor)) as ProjectSearch
   const projectsToDisplay = data?.projectSearch?.edges || []
 
   if (projectsToDisplay.length === 0) {
